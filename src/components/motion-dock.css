@@ -1,0 +1,51 @@
+/* Time controls share the right inspector; the canvas keeps its full height. */
+.studio-ui .studio-properties-view .motion-dock {
+  display:flex; flex:1; flex-direction:column; height:100%; min-height:0;
+  max-height:none; min-width:0; border:0; background:var(--studio-panel); font-family:var(--font-sans);
+}
+.motion-dock-heading { display:flex; flex:none; align-items:center; justify-content:space-between; gap:12px; min-height:64px; padding:10px 16px; border-bottom:1px solid var(--signal-line); }
+.motion-dock-heading h2 { display:flex; flex-direction:column; gap:3px; margin:0; color:var(--signal-paper); font-size:16px; font-weight:550; letter-spacing:0; }
+.motion-dock-heading h2 span { color:var(--signal-muted); font-size:13px; font-weight:400; }
+.motion-dock-actions { display:flex; align-items:center; gap:8px; }
+.motion-dock-actions > span { display:none; }
+.motion-dock-transport { flex:none; min-width:0; border-bottom:1px solid var(--signal-line); }
+.studio-ui .studio-properties-view .motion-dock .signal-transport { min-height:0; padding:10px; border:0; }
+.studio-ui .studio-properties-view .motion-dock .studio-animation-transport { flex-wrap:wrap; gap:6px; overflow:visible; font-size:13px; }
+.studio-ui .studio-properties-view .motion-dock .studio-animation-transport > button[type=button] { display:inline-flex; flex:none; align-items:center; justify-content:center; min-height:36px; min-width:36px; padding:5px 7px; border-radius:4px; font-size:14px; }
+.studio-ui .studio-properties-view .motion-dock .studio-animation-transport > button[type=button]:first-child { min-width:68px; }
+.studio-ui .studio-properties-view .motion-dock .studio-animation-transport > output { flex:none; min-width:80px; margin-left:auto; font-size:12px; }
+.studio-ui .studio-properties-view .motion-dock .studio-animation-transport > input[type=range] { order:1; flex:1 0 100%; width:100%; min-width:0; height:24px; }
+.studio-ui .studio-properties-view .motion-dock .studio-capture-frame { width:36px; padding:0; }
+.studio-ui .studio-properties-view .studio-capture-frame > span { display:none; }
+.motion-dock-body { display:flex; flex:1; min-height:0; min-width:0; flex-direction:column; }
+.motion-channel-list { display:grid; flex:none; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:12px; border-bottom:1px solid var(--signal-line); }
+.studio-ui .motion-dock .motion-channel { display:flex; align-items:center; justify-content:flex-start; gap:7px; min-height:42px; width:100%; min-width:0; padding:7px 8px; border:1px solid var(--studio-control-line); border-radius:4px; background:transparent; color:var(--signal-muted); text-align:left; font-size:14px; line-height:1.35; }
+.studio-ui .motion-dock .motion-channel[aria-pressed=true] { color:var(--signal-paper); background:#253021; border-color:#71855e; }
+.studio-ui .motion-dock .motion-channel:hover { background:#1b2319; color:var(--signal-paper); }
+.motion-channel > svg { flex:none; }
+.motion-channel > span { min-width:0; }
+.motion-channel-on { fill:var(--signal-acid); color:var(--signal-acid); }
+.motion-channel-off { color:var(--signal-muted); }
+.motion-channel-properties { flex:1; min-height:0; min-width:0; padding:16px; overflow-y:auto; }
+.motion-channel-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.motion-channel-heading h3 { margin:0; font-size:16px; font-weight:550; color:var(--signal-paper); letter-spacing:0; }
+.motion-parameter-grid { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:20px; }
+.motion-parameter-grid > * { min-width:0; }
+.motion-select-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.motion-select-field > span { color:var(--signal-muted); font-size:15px; }
+.motion-switch-field { display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--signal-muted); font-size:14px; }
+.motion-channel-footer { display:flex; align-items:stretch; flex-direction:column; gap:14px; margin-top:18px; }
+.motion-link-bank { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.studio-ui .motion-dock .motion-appearance-link { display:inline-flex; align-items:center; justify-content:flex-start; gap:6px; min-height:36px; padding:6px 0; border:0; border-radius:0; background:transparent; color:var(--signal-muted); font-size:14px; line-height:1.4; text-align:left; }
+.studio-ui .motion-dock .motion-appearance-link:hover { color:var(--signal-paper); }
+.motion-appearance-link > svg { flex:none; }
+.studio-ui .motion-dock .motion-add-effect { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:8px 10px; border:1px solid var(--studio-control-line); border-radius:4px; background:transparent; font-size:15px; }
+.motion-control-note { margin:14px 0 0; color:var(--signal-muted); font-size:14px; line-height:1.55; }
+@media(max-width:1023px) {
+ .studio-ui .motion-dock .motion-channel { min-height:44px; }
+ .studio-ui .studio-properties-view .motion-dock .studio-animation-transport > button[type=button] { min-height:44px; min-width:40px; }
+ .studio-ui .studio-properties-view .motion-dock .studio-animation-transport > button[type=button]:first-child { min-width:64px; }
+ .motion-channel-list { gap:6px; padding:10px; }
+ .motion-channel-properties { padding:14px; }
+ .studio-ui .motion-dock .motion-appearance-link { min-height:44px; }
+}

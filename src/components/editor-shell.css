@@ -1,0 +1,169 @@
+/* Task status and output controls share the existing SGNL design tokens. */
+.studio-ui .signal-transport { min-height: 58px; padding: 8px 14px; flex-wrap: wrap; }
+.studio-image-status,.studio-animation-transport { display:flex; width:100%; align-items:center; gap:10px; flex-wrap:wrap; font-family:var(--font-mono,monospace); font-size:14px; }
+.studio-image-status>span { margin-right:auto; color:var(--studio-muted,#a5ad99); }
+.studio-image-status button,.studio-animation-transport button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:44px; min-width:44px; padding:8px 12px; border:1px solid var(--studio-line,#3a4131); background:var(--studio-ink,#080b06); }
+.studio-animation-transport button[aria-pressed=true] { color:var(--studio-highlight,#c4ff3b); border-color:currentColor; }
+.studio-animation-transport button:disabled { opacity:.4; cursor:not-allowed; }
+.studio-animation-transport>input[type=range] { flex:1 1 100px; width:140px; min-width:70px; accent-color:var(--studio-highlight,#c4ff3b); }
+.studio-animation-transport output { font-variant-numeric:tabular-nums; min-width:100px; }
+.studio-transport-help { margin-left:auto; color:var(--studio-muted,#a5ad99); font-size:12px; }
+.studio-export-preview { margin:18px 0 8px; padding:10px; border:1px solid var(--studio-line,#3a4131); }
+.studio-export-preview canvas { display:block; max-width:100%; max-height:180px; width:auto; height:auto; margin:auto; background:repeating-conic-gradient(#262b23 0% 25%,#171b14 0% 50%) 50% / 14px 14px; }
+.studio-export-preview figcaption { margin-top:8px; color:var(--studio-muted,#a5ad99); font-size:13px; line-height:1.5; }
+.studio-export-dialog { max-height:calc(100dvh - 24px); }
+.studio-ui :is(.studio-image-status,.studio-animation-transport) button:focus-visible { outline:2px solid var(--studio-highlight,#c4ff3b); outline-offset:3px; }
+@media(max-width:600px) {
+ .studio-ui .inspector-dialog { width:100%; }
+ .studio-ui .signal-transport { padding:8px; }
+ .studio-animation-transport { gap:6px; font-size:12px; }
+ .studio-animation-transport>input[type=range] { flex-basis:140px; }
+ .studio-animation-transport output { min-width:90px; }
+ .studio-transport-help { display:none; }
+ .studio-image-status { font-size:12px; gap:6px; }
+ .studio-export-preview canvas { max-height:130px; }
+}
+/* Transport buttons include text; legacy icon-only rules must not turn them into discs. */
+.studio-ui .signal-transport .studio-animation-transport > button[type="button"] {
+  display:inline-flex; flex-direction:row; align-items:center; justify-content:center;
+  border-radius:10px; white-space:nowrap; width:auto; line-height:1.2;
+}
+.studio-ui .signal-transport .studio-animation-transport > button[type="button"]:first-child { min-width:92px; }
+.studio-ui .signal-transport .studio-animation-transport > button[aria-pressed="true"] { background:var(--signal-acid); color:var(--signal-ink); }
+.studio-ui .studio-export-preview canvas { max-height:100px; }
+.studio-ui .studio-export-preview { margin-block:12px 8px; padding:8px; }
+.studio-ui .studio-export-preview figcaption { font-size:12px; line-height:1.4; }
+.studio-ui .studio-export-cancel { display:flex; align-items:center; justify-content:center; min-height:44px; width:100%; margin-top:14px; border:1px solid var(--signal-line); border-radius:10px; }
+
+/* Document structure, appearance and time occupy separate working areas. */
+.studio-ui .studio-layout { display:flex; flex:1; min-height:0; position:relative; overflow:clip; }
+.studio-layout > .studio-layer-panel { width:232px; flex:0 0 232px; }
+.studio-canvas-column { display:flex; flex:1; min-width:0; min-height:0; flex-direction:column; overflow:hidden; }
+.studio-properties-column { display:flex; flex:0 0 360px; width:360px; min-width:0; min-height:0; overflow:hidden; }
+.studio-ui .studio-properties-column .studio-inspector { width:100%; }
+.studio-ui .studio-appearance-inspector { min-height:0; overflow:hidden; }
+.studio-properties-header { display:flex; flex:none; align-items:center; justify-content:space-between; gap:12px; height:48px; min-height:48px; padding:0 16px; border-bottom:1px solid var(--signal-line); }
+.studio-properties-header strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:16px; font-weight:550; }
+.studio-properties-header > span { flex:none; color:var(--signal-muted); font-size:13px; }
+.studio-ui .studio-appearance-inspector .inspector-content { flex:1; min-height:0; overflow:auto; padding:0 16px 24px; scrollbar-gutter:stable; }
+.studio-ui .studio-appearance-inspector .inspector-section { padding:14px 0; border-bottom:1px solid var(--signal-line); }
+.studio-ui .studio-appearance-inspector .inspector-section > .studio-select { margin-bottom:8px; }
+.studio-ui .studio-appearance-inspector .inspector-field-label { display:block; margin:0 0 8px; font-size:15px; line-height:1.4; }
+.studio-ui .studio-appearance-inspector .studio-custom-inks { gap:8px; margin-top:10px; }
+.studio-ui .studio-appearance-inspector .inspector-group { margin:0; border:0; border-bottom:1px solid var(--signal-line); border-radius:0; background:transparent; }
+.studio-ui .studio-appearance-inspector .inspector-group > summary { min-height:44px; padding:12px 0; }
+.studio-ui .studio-appearance-inspector .inspector-group-content { padding:0 0 16px; }
+.studio-ui .studio-appearance-inspector .studio-composition { padding:14px 0; background:transparent; }
+.studio-ui .studio-appearance-inspector .studio-select { min-height:40px; }
+.studio-ui .studio-appearance-inspector .inspector-text-action { min-height:30px; padding:6px 0; font-size:14px; text-align:left; }
+.studio-ui .studio-appearance-inspector .studio-dial-bank { gap:4px; }
+.studio-ui .studio-appearance-inspector .inspector-heading { font-size:15px; }
+.studio-ui .studio-source-bar { display:flex; flex:none; min-height:48px; padding:6px 12px; gap:12px; }
+.studio-source-identity { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+.studio-source-identity h1 { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
+.studio-source-identity > span { flex:none; color:var(--signal-muted); font:11px var(--font-mono); }
+.studio-ui .studio-view-trigger { display:inline-flex; align-items:center; justify-content:center; flex:none; gap:6px; min-height:32px; padding:5px 9px; border:1px solid var(--studio-control-line); border-radius:4px; font-size:12px; }
+.studio-view-popup { width:300px; max-width:calc(100vw - 24px); max-height:min(540px,var(--available-height)); overflow:auto; padding:14px; border:1px solid var(--studio-control-line); border-radius:10px; background:var(--studio-panel); box-shadow:0 8px 24px #05060580; }
+.studio-popup-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; font-size:14px; }
+.studio-popup-heading button { display:flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; border:1px solid var(--studio-control-line); }
+.studio-view-toggle { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; font-size:13px; }
+.studio-view-popup > .inspector-field-label { display:block; margin:14px 0 8px; font-size:12px; }
+.studio-view-parameters { display:grid; gap:12px; margin-top:14px; }
+.studio-view-popup > p { margin:14px 0 0; color:var(--signal-muted); font-size:11px; line-height:1.5; }
+.studio-ui .studio-docked-transport .studio-animation-transport { gap:6px; }
+.studio-mobile-panels { display:none; }
+.studio-ui .studio-panel-dialog { width:min(400px,100vw); min-height:0; background:var(--studio-panel); }
+.studio-panel-dialog-content { display:flex; flex:1; min-height:0; overflow:hidden; }
+.studio-panel-dialog-content > * { width:100%; min-height:0; }
+.studio-ui .studio-panel-dialog-header { display:flex; flex:none; align-items:center; justify-content:space-between; gap:12px; min-height:56px; padding:6px 12px; border-bottom:1px solid var(--signal-line); }
+.studio-panel-dialog-header h2 { font-size:14px; letter-spacing:0; }
+.studio-panel-dialog-header > div { display:flex; align-items:center; gap:8px; }
+.studio-ui .studio-panel-dialog-header button { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:6px 10px; border:1px solid var(--studio-control-line); font-size:12px; }
+.studio-ui .studio-panel-dialog-header button:last-child { width:44px; padding:0; }
+.studio-ui .studio-history-tools button { display:flex; align-items:center; justify-content:center; padding:0; border-radius:4px; }
+.studio-ui .studio-toolbar { gap:8px; padding-top:6px; }
+.studio-ui .studio-toolbar button { min-height:36px; border-radius:4px; }
+.studio-ui .studio-history-tools button { width:36px; }
+.studio-ui .sample-picker { min-height:36px; border-radius:4px; }
+.studio-ui .sgnl-header.is-editor { padding-bottom:8px; }
+.studio-ui .main-navigation button[aria-current=page] { background:#253021; color:var(--signal-paper); border-color:#566747; }
+.studio-ui .studio-toolbar svg { flex:none; }
+.studio-ui .studio-toolbar .studio-history-tools button[type=button] { border-radius:4px; }
+.studio-ui .studio-zoom button[aria-pressed=true] { background:#253021; color:var(--signal-paper); border-color:#566747; }
+@media(min-width:1024px) and (max-width:1199px) {
+ .studio-layout > .studio-layer-panel { width:212px; flex-basis:212px; }
+ .studio-properties-column { width:340px; flex-basis:340px; }
+ .studio-ui .studio-zoom > div:last-child { display:none; }
+}
+@media(max-width:1023px) {
+ .studio-ui .studio-layout { flex-direction:column; }
+ .studio-canvas-column { width:100%; }
+ .studio-mobile-panels { display:flex; flex:none; min-height:56px; padding-bottom:env(safe-area-inset-bottom); border-top:1px solid var(--signal-line); background:var(--studio-panel); }
+ .studio-ui .studio-mobile-panels button { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:52px; padding:5px 3px; border:0; border-radius:0; background:transparent; font-size:11px; }
+ .studio-ui .studio-mobile-panels button[aria-pressed=true] { color:var(--signal-acid); background:#253021; }
+ .studio-ui .studio-appearance-inspector .studio-select { min-height:44px; }
+ .studio-ui .studio-source-bar { min-height:44px; padding-inline:10px; }
+ .studio-source-identity { gap:6px; }
+ .studio-source-identity > span { font-size:10px; }
+ .studio-ui .studio-view-trigger { min-height:36px; }
+ .studio-ui .studio-toolbar button { min-height:44px; }
+ .studio-ui .studio-history-tools button { width:44px; }
+ .studio-ui .studio-properties-header { height:44px; min-height:44px; }
+ .studio-capture-frame > span { display:none; }
+ .studio-ui .inspector-dialog > .studio-panel-dialog-header.is-layers { position:absolute; top:0; right:8px; z-index:1; width:44px; padding:4px 0; border:0; }
+ .studio-mobile-inspector .studio-layer-panel-heading { min-height:56px; padding-right:60px; }
+}
+@media(max-width:380px) {
+ .studio-source-identity > span { display:none; }
+ .studio-ui .studio-toolbar { gap:5px; }
+ .studio-ui .sgnl-header.is-editor { padding-inline:10px; }
+}
+
+/* One persistent entry to Motion, beside the selected appearance controls. */
+.studio-properties-workspace { display:flex; flex:1; flex-direction:column; min-height:0; min-width:0; width:100%; background:var(--studio-panel); }
+.studio-property-tabs { display:grid; flex:none; grid-template-columns:1fr 1fr; height:52px; padding:6px 8px; gap:6px; border-bottom:1px solid var(--signal-line); }
+.studio-ui .studio-property-tabs > button { display:flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:6px 8px; border:1px solid transparent; border-radius:5px; font-size:15px; color:var(--signal-muted); background:transparent; }
+.studio-ui .studio-property-tabs > button[aria-pressed=true] { color:var(--signal-paper); background:#253021; border-color:#71855e; }
+.studio-property-tabs svg { flex:none; }
+.studio-properties-view,.studio-appearance-view { display:flex; flex:1; min-height:0; min-width:0; width:100%; overflow:hidden; }
+.studio-ui .studio-properties-workspace .parameter-label { font-size:15px; line-height:1.45; }
+.studio-ui .studio-properties-workspace .parameter-value { font-size:14px; }
+.studio-ui .studio-properties-workspace .fader-endpoints { font-size:11px; }
+.studio-ui .studio-properties-workspace .studio-select { font-size:15px; }
+.studio-ui .studio-properties-workspace .studio-color-trigger > span:nth-child(2) { font-size:14px; }
+.studio-ui .studio-properties-workspace .studio-context-note { font-size:14px; line-height:1.5; }
+.studio-ui .studio-layer-panel-heading h2 { font-size:15px; }
+.studio-ui .studio-layer-panel .studio-layer-panel-add { font-size:14px; }
+.studio-ui .layer-stack .layer-stack-name button > span,.studio-ui .layer-base-name { font-size:14px; }
+.studio-ui .layer-stack-name small,.studio-ui .layer-base-name small { font-size:12px; }
+.studio-ui .studio-composition-target > span { font-size:14px; }
+.studio-ui .studio-composition-target small { font-size:12px; }
+.studio-ui .layer-geometry > summary { font-size:14px; }
+.studio-ui .studio-properties-workspace .studio-dial-bank .parameter-label { font-size:14px; }
+/* Preserve SGNL interaction feedback on the reorganized controls. */
+@media (hover:hover) and (pointer:fine) {
+ .studio-ui .studio-property-tabs > button:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .studio-choice-grid > button:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .studio-scope-tabs > button:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .studio-animation-transport > button:enabled:hover,
+ .studio-ui .studio-view-trigger:enabled:hover,
+ .studio-ui .studio-history-tools > button:enabled:hover,
+ .studio-ui .studio-panel-dialog-header button:enabled:hover,
+ .studio-ui .studio-popup-heading button:enabled:hover,
+ .studio-ui .studio-export-cancel:enabled:hover {
+   color:var(--signal-acid); border-color:var(--signal-acid); background:var(--studio-panel);
+ }
+ .studio-ui .inspector-text-action:enabled:hover,
+ .studio-ui .inspector-group > summary:hover,
+ .studio-ui .layer-geometry > summary:hover { color:var(--signal-acid); }
+ .studio-ui .inspector-group > summary:hover .inspector-heading { color:inherit; }
+ .studio-ui .studio-composition-target:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .layer-stack-base:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .layer-stack-name > button:enabled:hover:not([aria-pressed=true]),
+ .studio-ui .studio-mobile-panels > button:enabled:hover { background:#c4ff3512; color:var(--signal-acid); }
+}
+@media(max-width:1023px) {
+ .studio-property-tabs { height:56px; }
+ .studio-ui .studio-property-tabs > button { min-height:44px; }
+ .studio-ui .studio-mobile-panels button { font-size:14px; }
+}

@@ -1,0 +1,37 @@
+.signal-glitch-glyph { position: relative; display: inline-block; }
+.signal-glitch-glyph::before,.signal-glitch-glyph::after {
+  content: attr(data-glyph);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--signal-violet);
+}
+.signal-glitch-glyph::after { color: var(--signal-glitch-echo, var(--signal-acid)); }
+
+:where(.signal-engine:is(:hover,:focus-visible),.studio-ui button:enabled:is(:hover,:focus-visible,:active),.studio-ui summary:is(:hover,:focus-visible,:active)) .signal-glitch-glyph {
+  animation: signal-glyph-break 460ms steps(1, end);
+}
+:where(.signal-engine:is(:hover,:focus-visible),.studio-ui button:enabled:is(:hover,:focus-visible,:active),.studio-ui summary:is(:hover,:focus-visible,:active)) .signal-glitch-glyph::before {
+  animation: signal-glyph-slice 460ms steps(1, end);
+}
+:where(.signal-engine:is(:hover,:focus-visible),.studio-ui button:enabled:is(:hover,:focus-visible,:active),.studio-ui summary:is(:hover,:focus-visible,:active)) .signal-glitch-glyph::after {
+  animation: signal-glyph-slice 460ms steps(1, end) reverse;
+}
+
+@keyframes signal-glyph-break {
+  0%,100% { transform: none; }
+  15%,55% { transform: translateX(-3px) skewX(-9deg); }
+  30%,70% { transform: translateX(4px); }
+  85% { transform: translateX(-1px); }
+}
+@keyframes signal-glyph-slice {
+  0%,100% { opacity: 0; }
+  12%,50% { opacity: 1; clip-path: inset(10% 0 58% 0); transform: translateX(7px); }
+  28%,72% { opacity: 1; clip-path: inset(54% 0 5% 0); transform: translateX(-6px); }
+  86% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-glitch-glyph,.signal-glitch-glyph::before,.signal-glitch-glyph::after { animation: none !important; }
+}

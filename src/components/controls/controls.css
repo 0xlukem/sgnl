@@ -1,0 +1,139 @@
+/* Instrument controls share SGNL's palette; portals carry the same tokens. */
+.studio-control-positioner {
+  color-scheme: dark;
+  --studio-panel: #0d0f0b;
+  --studio-control-line: #3a4232;
+  --studio-control-surface: var(--signal-ink);
+  --studio-control-radius: 11px;
+  z-index: 100;
+  color: var(--signal-paper);
+  font-family: var(--font-sans);
+}
+.studio-tools-root { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.controls-loading { width: 400px; max-width: 100%; padding: 24px; color: var(--signal-muted); font-family: var(--font-mono); font-size: 13px; }
+.studio-tool-panel { width: 100%; }
+.studio-tool-panel > :is(.inspector-section, .inspector-edit-target) { padding: 22px 0; border-bottom: 1px solid var(--signal-line); }
+.studio-tool-panel > .inspector-section:last-child { border-bottom: 0; }
+.studio-tool-panel > .inspector-edit-target { padding-block: 16px; }
+
+/* A readable value and nine real graduations accompany every precision fader. */
+.studio-fader { --parameter-accent: var(--signal-acid); min-width: 0; padding-block: 3px; }
+.parameter-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.parameter-label { min-width: 0; color: var(--signal-muted); font-size: 13px; line-height: 1.4; }
+.parameter-value { display: inline-block; min-width: 50px; padding: 2px 4px; border-bottom: 1px dashed var(--studio-control-line); color: var(--signal-paper); font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; cursor: text; }
+.parameter-value:hover, .parameter-value:focus-visible { color: var(--signal-acid); border-color: var(--signal-acid); }
+.parameter-value input { width: 72px; max-width: 100%; padding: 0; text-align: right; outline-color: var(--signal-acid); }
+.fader-control { display: flex; min-height: 36px; align-items: center; padding-inline: 9px; cursor: ew-resize; }
+.fader-track { width: 100%; height: 2px; background: #3d4437; }
+.fader-indicator { height: 100%; background: var(--parameter-accent); }
+.fader-mark { top: -5px; width: 1px; height: 12px; background: #62695a; pointer-events: none; }
+.fader-mark[data-active] { background: var(--parameter-accent); opacity: .55; }
+.fader-mark:nth-of-type(odd) { top: -3px; height: 8px; }
+.fader-thumb { display: grid; width: 18px; height: 25px; place-items: center; border: 1px solid #8a937c; background: #20261b; box-shadow: 0 2px 0 #050605; }
+.fader-thumb > span { width: 2px; height: 13px; background: var(--parameter-accent); pointer-events: none; }
+.fader-thumb:focus-within, .studio-fader[data-dragging] .fader-thumb { border-color: var(--parameter-accent); outline: 2px solid var(--parameter-accent); outline-offset: 3px; }
+.fader-endpoints { display: flex; justify-content: space-between; padding-inline: 5px; color: #929c87; font-family: var(--font-mono); font-size: 10px; line-height: 1; }
+
+.studio-dial-bank { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding-block: 12px; border-bottom: 1px solid var(--signal-line); }
+.studio-dial { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 6px; }
+.studio-dial .parameter-label { text-align: center; }
+.studio-dial-bank .parameter-label { min-height: 36px; }
+.studio-dial .parameter-value { min-width: 64px; text-align: center; }
+.dial-control { position: relative; width: 78px; height: 78px; cursor: ns-resize; }
+.dial-track, .dial-indicator { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; }
+.dial-track { color: #414a37; }
+.dial-indicator { color: var(--parameter-accent); }
+.dial-thumb { position: absolute; inset: 17px; border: 1px solid #6b755c; border-radius: 50%; background: #20261b; }
+.dial-thumb:focus-within, .studio-dial[data-dragging] .dial-thumb { outline: 2px solid var(--parameter-accent); outline-offset: 4px; }
+.dial-needle { position: absolute; top: 4px; left: calc(50% - 1px); width: 2px; height: 13px; background: var(--parameter-accent); }
+.dial-mark { position: absolute; inset: 0; pointer-events: none; }
+.dial-mark > span { position: absolute; top: 0; left: calc(50% - .5px); width: 1px; height: 4px; background: #8b957d; }
+
+/* Disabled instruments retain their values and geometry, with no active lime affordance. */
+:is(.studio-fader, .studio-dial)[data-disabled] { --parameter-accent: #696b68 !important; }
+:is(.studio-fader, .studio-dial)[data-disabled] :is(.parameter-label, .parameter-value, .fader-endpoints) { color: #858783; }
+:is(.studio-fader, .studio-dial)[data-disabled] :is(.fader-control, .dial-control, .parameter-value) { cursor: not-allowed; }
+:is(.studio-fader, .studio-dial)[data-disabled] .parameter-value { border-color: #414340; }
+:is(.studio-fader, .studio-dial)[data-disabled] :is(.fader-thumb, .dial-thumb) { border-color: #555753; background: #1b1d1a; }
+.studio-dial[data-disabled] .dial-mark > span { background: #626460; }
+.parameter-disabled-reason { margin: 7px 0 0; color: #989b95; font-size: 11px; line-height: 1.5; }
+.studio-dial .parameter-disabled-reason { text-align: center; }
+
+/* Animate UI supplies the spring; the track and the resting positions are ours. */
+.studio-ui .studio-switch { position: relative; display: inline-flex; flex: none; width: 62px; height: 28px; min-height: 28px; padding: 3px; align-items: center; border: 1px solid var(--studio-control-line); border-radius: 8px; background: var(--studio-control-surface); color: var(--signal-muted); cursor: pointer; }
+.studio-ui .studio-switch[data-checked] { border-color: var(--signal-acid); background: var(--studio-selection-surface); color: var(--signal-ink); }
+.switch-thumb { position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 5px; background: #9ca58e; translate: 0 0; }
+.switch-thumb[data-checked] { translate: 34px 0; background: var(--signal-ink); }
+.switch-state { position: absolute; right: 5px; font-family: var(--font-mono); font-size: 10px; }
+.studio-switch[data-checked] .switch-state { right: auto; left: 6px; }
+.studio-labeled-switch { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--signal-muted); }
+.light-control-header { display: grid; grid-template-columns: minmax(0, 1fr) 62px; align-items: center; gap: 12px; }
+
+.studio-ui .studio-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.studio-ui .studio-tabs .studio-tool-tab { display: flex; min-width: 0; align-items: center; justify-content: center; min-height: 44px; }
+.studio-ui .studio-tabs button[data-active] { color: var(--signal-ink); background: var(--signal-acid); font-weight: 600; }
+.studio-ui .inspector-accordion-panel { overflow: hidden; padding: 0; border: 0; }
+.inspector-accordion-content { padding: 16px 0 22px; border-top: 1px solid var(--signal-line); }
+.studio-ui .inspector-accordion-toggle:hover { color: var(--signal-acid); }
+.studio-ui .inspector-accordion-toggle:hover .inspector-heading { color: inherit; }
+
+.studio-select { display: flex; width: 100%; min-width: 0; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; border: 1px solid var(--studio-control-line); border-radius: var(--studio-control-radius); background: var(--studio-control-surface); color: var(--signal-paper); font-family: var(--font-sans); font-size: 13px; text-align: left; cursor: pointer; }
+.studio-select > span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.studio-select[data-popup-open], .studio-select:hover { border-color: var(--signal-acid); }
+.studio-ui .hud-engine-select { width: 220px; min-height: 30px; flex-shrink: 0; padding: 4px 8px; color: var(--signal-acid); }
+.studio-select-popup { width: var(--anchor-width); min-width: 190px; max-width: calc(100vw - 24px); max-height: min(380px, var(--available-height)); overflow-y: auto; padding: 6px; border: 1px solid var(--studio-control-line); border-radius: 14px; background: var(--studio-panel); box-shadow: 0 8px 24px #05060580; transform-origin: var(--transform-origin); transition: opacity 140ms, transform 140ms; }
+.studio-select-popup:is([data-starting-style], [data-ending-style]) { opacity: 0; transform: translateY(-4px); }
+.control-popup-label { padding: 7px 8px 10px; color: var(--signal-muted); font-size: 11px; }
+.studio-select-option { display: flex; min-height: 40px; align-items: center; justify-content: space-between; gap: 16px; padding: 8px; border-radius: 8px; color: var(--signal-paper); font-size: 13px; cursor: pointer; outline: 0; }
+.studio-select-option[data-highlighted]:not([data-selected]) { background: #242823; color: var(--signal-paper); }
+.studio-select-option[data-selected] { background: var(--signal-acid); color: var(--signal-ink); }
+
+.studio-color-trigger { display: grid; width: 100%; min-width: 0; min-height: 60px; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 4px 9px; padding: 9px; border: 1px solid var(--studio-control-line); border-radius: var(--studio-control-radius); background: var(--studio-control-surface); text-align: left; }
+.studio-color-trigger:hover { border-color: var(--signal-acid); }
+.studio-color-trigger > .color-chip { grid-row: span 2; width: 24px; height: 32px; border: 1px solid #73776e; border-radius: 6px; }
+.studio-color-trigger > span:nth-child(2) { color: var(--signal-paper); font-size: 12px; line-height: 1.2; }
+.studio-color-trigger .color-hex { color: var(--signal-muted); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; }
+.studio-color-popup { width: 256px; max-width: calc(100vw - 24px); max-height: min(var(--available-height, calc(100dvh - 24px)), calc(100dvh - 24px)); overflow-y: auto; padding: 14px; border: 1px solid var(--studio-control-line); border-radius: 16px; background: var(--studio-panel); box-shadow: 0 8px 24px #05060580; }
+.color-popup-header { position: sticky; top: -14px; z-index: 1; display: flex; min-height: 32px; align-items: center; justify-content: space-between; margin-bottom: 10px; background: var(--studio-panel); font-family: var(--signal-display); font-size: 15px; }
+.color-popup-header button { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--studio-control-line); border-radius: 50%; background: var(--studio-control-surface); font-size: 20px; }
+.studio-color-popup .react-colorful { width: 100%; height: 170px; }
+.studio-color-popup .react-colorful__saturation { border-radius: 8px 8px 0 0; }
+.studio-color-popup .react-colorful__last-control { border-radius: 0 0 8px 8px; }
+.studio-color-popup .react-colorful__pointer { width: 18px; height: 18px; }
+.color-hex-field { display: flex; min-height: 40px; align-items: center; gap: 12px; margin-top: 14px; padding: 8px; border: 1px solid var(--studio-control-line); border-radius: 8px; font-family: var(--font-mono); font-size: 13px; }
+.color-hex-field label { color: var(--signal-muted); font-size: 11px; }
+.color-hex-field input { width: 100%; min-width: 0; color: var(--signal-paper); background: transparent; text-transform: uppercase; }
+.color-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
+.color-swatches button { width: 100%; min-height: 28px; border: 1px solid #ffffff40; border-radius: 6px; }
+.color-swatches button[aria-pressed="true"] { outline: 2px solid var(--signal-paper); outline-offset: 2px; }
+.studio-control-positioner :focus-visible { outline: 2px solid var(--signal-acid); outline-offset: 3px; }
+.studio-select-popup, .studio-color-popup { scrollbar-width: thin; scrollbar-color: #505548 var(--studio-panel); }
+
+@media (max-width: 1023px) {
+  .fader-control { min-height: 44px; }
+  .studio-ui .studio-switch { min-height: 32px; height: 32px; }
+  .switch-thumb { top: 5px; }
+  .studio-ui .studio-switch::before { content: ''; position: absolute; inset: -6px 0; }
+  .studio-select, .studio-select-option { min-height: 44px; }
+  .parameter-value { min-height: 30px; padding-block: 5px; }
+  .studio-dial-bank { gap: 8px; }
+  .color-popup-header button { width: 44px; height: 44px; }
+  .color-swatches { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .color-swatches button { min-height: 44px; }
+}
+@media (max-width: 900px) {
+  .studio-ui .studio-toolbar .sample-picker { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-control-positioner *, .studio-control-positioner *::after { transition: none !important; animation: none !important; }
+}
+
+.parameter-interaction { min-width:0; }
+.parameter-number-actions { display:flex;align-items:center;justify-content:flex-end;gap:4px;min-width:0; }
+.studio-ui .parameter-value { padding:3px 5px;min-height:32px;border:1px solid transparent;font-family:var(--font-mono);font-size:12px;color:var(--signal-paper);background:transparent;border-radius:5px;white-space:nowrap; }
+.studio-ui .parameter-value:hover:enabled { border-color:var(--signal-line); }
+.studio-ui .parameter-reset { display:inline-grid;place-items:center;width:28px;height:32px;min-height:32px;min-width:28px;color:var(--signal-muted);border:0;background:transparent;border-radius:5px; }
+.studio-ui .parameter-reset:disabled { opacity:.25; }
+.studio-ui .parameter-number-input { width:78px;max-width:100%;min-height:32px;padding:3px 5px;border:1px solid var(--signal-acid);font:12px var(--font-mono);background:var(--signal-ink);color:var(--signal-paper); }
+.studio-dial .parameter-number-actions { justify-content:center; }
+@media(max-width:1023px) { .studio-ui .parameter-value,.studio-ui .parameter-reset { min-height:44px; } .studio-ui .parameter-reset { min-width:32px; } }

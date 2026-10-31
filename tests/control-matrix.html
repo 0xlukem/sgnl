@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SGNL · Matriz de controles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+body{margin:28px;background:#111510;color:#e8ecdf;font:15px/1.5 system-ui}button{padding:12px 18px;margin-right:12px;background:#c3ff35;border:0;border-radius:6px;color:#111}progress{width:100%;height:20px}canvas{width:320px;max-width:100%;border:1px solid #5c6654}pre{white-space:pre-wrap;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid #46503c;padding:5px;text-align:left}#json{display:none}.images{display:flex;gap:12px;flex-wrap:wrap}label{display:block;margin-bottom:10px}a{color:#c3ff35}
+</style>
+<h1>SGNL · Matriz funcional de controles</h1>
+<p>Renderizador y reglas de disponibilidad del checkout actual. Foto fija, semilla 409 y fotograma 42. La batería no cambia el estado del Studio.</p>
+<p><a href="?phase=conditional">Abrir variantes de Warp, Motion, Cursor, paletas y sustratos</a></p>
+<p><a href="?phase=hybrid">Abrir matriz Hybrid: Base Canvas, rectángulo y elipse</a> · <a href="?phase=probe">Revisar diferencias mínimas y estabilidad del rasterizado</a></p>
+<button id="start">Iniciar matriz</button><button id="download" disabled>Descargar JSON</button>
+<label><input id="native" type="checkbox"> Repetir a 1280px los descriptores activos sin cambios a 320px</label>
+<progress id="progress" max="1" value="0"></progress>
+<p id="status" role="status">Preparado</p>
+<div class="images"><figure><canvas id="a" width="320" height="202"></canvas><figcaption id="ca">Mínimo</figcaption></figure><figure><canvas id="b" width="320" height="202"></canvas><figcaption id="cb">Intermedio</figcaption></figure><figure><canvas id="c" width="320" height="202"></canvas><figcaption id="cc">Máximo</figcaption></figure></div>
+<pre id="summary"></pre><pre id="json"></pre>
+<table><thead><tr><th>Motor</th><th>Destino</th><th>Control</th><th>Estado</th><th>Δ medio / máximo</th></tr></thead><tbody id="rows"></tbody></table>
+<script type="module">
+import { renderStudioFrame } from '/src/engine/renderer.ts';
+import { getDisabledControls } from '/src/engine/controlAvailability.ts';
+import { GLYPH_RAMPS, DEFAULT_BASE_CANVAS } from '/src/engine/types.ts';
+import { BUILTIN_RECIPES } from '/src/engine/recipes.ts';
+
+const $ = (id) => document.getElementById(id);
+const phase = new URLSearchParams(location.search).get('phase') ?? 'main';
+const contexts = ['hybrid', 'probe-hybrid'].includes(phase) ? ['hybrid-base', 'hybrid-layer-rect', 'hybrid-layer-ellipse']
+ : ['conditional', 'probe'].includes(phase) ? ['base'] : ['base', 'layer-rect', 'layer-ellipse'];
+const engines = phase === 'probe' ? ['halftone', 'led']
+ : phase === 'probe-hybrid' ? ['dither-lines', 'halftone', 'woodblock'] : Object.keys(GLYPH_RAMPS);
+const canvases = ['a','b','c'].map($);
+const ctxs = canvases.map((c) => c.getContext('2d', {willReadFrequently:true}));
+const image = new Image(); image.src='/samples/colosseum-rome.jpg';
+const controls=[];
+function control(id,values,path,divide=1,prepare=()=>{}) { controls.push({id,values,path,divide,prepare}); }
+const style=(id,values,field,divide=1,prepare)=>control(id,values,['source',field],divide,prepare);
+const global=(id,values,group,field,divide=1,prepare)=>control(id,values,[group,field],divide,prepare);
+const glass=(s,source)=>{source.substrateMode='glass';};
+const text=(s)=>{s.crt.textOverlay={enabled:true,text:'SGNL // 2026',subtext:'CONTROL MATRIX',x:.5,y:.6,size:54,color:'#f4f4ec',layerOrder:'front',fontStyle:'editorial-mono'};};
+const warp=(mode)=>(s)=>{s.grading.warpMode=mode;s.grading.warpIntensity=70;};
+const tracking=(s)=>{Object.assign(s.tracking,{enabled:true,intensity:65,bandHeight:25,position:50,lineJitter:20,chromaBleed:20,dropouts:10});};
+const glitch=(s)=>{Object.assign(s.glitch,{enabled:true,sliceFrequency:70,maxDisplacement:65,rgbSplit:0,databendChunks:0});};
+const sort=(s)=>{glitch(s);Object.assign(s.glitch,{sliceFrequency:0,pixelSortEnabled:true,pixelSortStrength:80,pixelSortMin:0,pixelSortMax:100,pixelSortDirection:'columns'});};
+const motion=(s)=>{s.crt.motionMode='relight';s.crt.motionAmount=80;s.crt.motionSpeed=100;};
+const cursor=(s,o)=>{s.crt.cursorEffect='repel';o.cursor={x:.52,y:.52,active:true};};
+
+style('style-cell-size',[4,22,40],'cellSize');
+style('style-local-contrast',[50,135,220],'contrast',100);
+style('print-angle',[-180,45,180],'printAngle');
+style('print-weight',[25,100,200],'printWeight',100);
+style('print-roughness',[0,50,100],'printRoughness',100);
+style('print-registration',[0,50,100],'printRegistration',100,(s,source)=>{source.color='risograph';});
+style('tile-gap',[0,25,50],'tileGap',100);
+style('tile-roundness',[0,50,100],'tileRoundness',100);
+style('canvas-knockout-opacity',[0,50,100],'knockoutOpacity',100);
+control('canvas-',[0,16,32],['baseCanvas','backdropBlur'],1,glass);
+global('frame-zoom',[100,200,300],'baseCanvas','zoom',100);
+global('frame-pan-x',[-50,0,50],'baseCanvas','panX',100);
+global('frame-pan-y',[-50,0,50],'baseCanvas','panY',100);
+global('txt-size',[20,90,160],'text','size',1,text);
+global('txt-x',[0,50,100],'text','x',100,text);
+global('txt-y',[0,50,100],'text','y',100,text);
+for(const [id,values,field,divide]of [
+ ['grade-brightness',[-50,0,50],'brightness',1],['grade-contrast',[50,125,200],'contrast',1],
+ ['grade-saturation',[0,100,200],'saturation',1],['grade-black',[0,22,45],'blackPoint',1],
+ ['grade-white',[55,77,100],'whitePoint',1],['grade-gamma',[25,162,300],'gamma',100],
+ ['grade-shadows',[-100,0,100],'shadows',1],['grade-highlights',[-100,0,100],'highlights',1],
+ ['grade-edge',[0,50,100],'edgeBoost',1],['grade-sharpen',[0,50,100],'sharpen',1],
+ ['grade-denoise',[0,50,100],'denoise',1],
+])global(id,values,'grading',field,divide);
+global('warp-intensity',[-100,0,100],'grading','warpIntensity',1,warp('wave'));
+global('warp-radius',[10,80,150],'grading','warpRadius',100,warp('swirl'));
+global('warp-frequency',[1,10,20],'grading','warpFrequency',1,warp('wave'));
+global('warp-angle',[-180,45,180],'grading','warpAngle',1,warp('wave'));
+for(const [id,values,field]of [
+ ['trk-intensity',[0,50,100],'intensity'],['trk-band-height',[4,19,35],'bandHeight'],
+ ['trk-pos',[0,50,100],'position'],['trk-bleed',[0,50,100],'chromaBleed'],
+ ['trk-jitter',[0,50,100],'lineJitter'],['trk-dropouts',[0,50,100],'dropouts'],
+])global(id,values,'tracking',field,1,tracking);
+for(const [id,field]of [['gl-freq','sliceFrequency'],['gl-disp','maxDisplacement'],['gl-rgb','rgbSplit'],['gl-databend','databendChunks']])global(id,[0,50,100],'glitch',field,1,glitch);
+for(const [id,values,field]of [['ps-strength',[5,52,100],'pixelSortStrength'],['ps-min',[0,40,80],'pixelSortMin'],['ps-max',[20,60,100],'pixelSortMax']])global(id,values,'glitch',field,1,sort);
+for(let i=0;i<3;i++)for(const [field,values,divide]of [['intensity',[0,50,100],1],['radius',[10,65,120],100],['x',[0,50,100],100],['y',[0,50,100],100]]){
+ const light=(s)=>{s.crt.lights=[0,1,2].map((j)=>({id:'light-'+j,enabled:i===j,intensity:75,radius:.6,x:.5,y:.5,color:['#00FF66','#FF3B7F','#38BDF8'][j]}));};
+ control(`light-${i}-${field}`,values,['light',i,field],divide,light);
+}
+global('motion-speed',[10,155,300],'crt','motionSpeed',1,motion);
+global('motion-amount',[0,50,100],'crt','motionAmount',1,motion);
+// prepare receives (state, source, options), keeping cursor position fixed.
+global('hover-radius',[5,27,50],'crt','hoverRadius',1,(s,source,o)=>cursor(s,o));
+global('hover-strength',[0,50,100],'crt','hoverStrength',1,(s,source,o)=>cursor(s,o));
+for(const [id,field]of [['crt-glow','phosphorGlow'],['crt-whole-bloom','wholeBloom'],['crt-prism','prismAberration'],['crt-scan','scanlines'],['crt-mask','apertureMask'],['crt-curve','barrelCurve'],['crt-vig','vignette'],['crt-grain','filmGrain'],['crt-dust','dustSpec']])global(id,[0,50,100],'crt',field);
+control('Before and after comparison',[0,.5,1],['options','splitWipeX']);
+control('Signal time',[0,5,10],['options','time'],1,tracking);
+
+let cases = controls;
+if (phase === 'conditional') {
+ cases=[];
+ const variant=(d,scenario,prepare,width=320)=>cases.push({...d,scenario,width,prepare:(s,source,o)=>{d.prepare(s,source,o);prepare(s,source,o);}});
+ for(const mode of ['off','ripple','wave','swirl','pinch','sphere','zigzag','shear','polar','fragment'])
+  for(const d of controls.filter(d=>d.id.startsWith('warp-')))
+   variant(d,'warp:'+mode,(s)=>{s.grading.warpMode=mode;s.grading.warpIntensity=70;});
+ for(const mode of ['off','relight','sheen','glow','shimmer','parallax','push','focus','mist'])
+  for(const d of controls.filter(d=>d.id.startsWith('motion-')))
+   variant(d,'motion:'+mode,(s)=>{s.crt.motionMode=mode;});
+ for(const mode of ['off','reveal','loupe','trail','repel','dissolve','water','vortex','magnetic','scatter'])
+  for(const d of controls.filter(d=>d.id.startsWith('hover-')))
+   variant(d,'cursor:'+mode,(s)=>{s.crt.cursorEffect=mode;});
+ for(const mode of ['reveal','trail'])for(const d of controls.filter(d=>d.id.startsWith('hover-')))
+  variant(d,'cursor-native:'+mode,(s)=>{s.crt.cursorEffect=mode;},1000);
+ for(const color of ['green','amber','white','cyan','crimson','sampled','grayscale','risograph','blueprint','newsprint','gameboy','macintosh','custom'])
+  for(const d of controls.filter(d=>['grade-saturation','print-registration'].includes(d.id)))
+   variant(d,'palette:'+color,(s,source)=>{source.color=color;});
+ for(const substrate of ['knockout','glass','source','duotone','solid','gradient','transparent'])
+  for(const d of controls.filter(d=>['canvas-knockout-opacity','canvas-'].includes(d.id)))
+   variant(d,'substrate:'+substrate,(s,source)=>{source.substrateMode=substrate;});
+}
+if (phase === 'probe') {
+ cases=[];
+ for (const [id,scenario,prepare] of [
+  ['warp-angle','warp:off',(s)=>{s.grading.warpMode='off';}],
+  ['warp-frequency','warp:swirl',(s)=>{s.grading.warpMode='swirl';s.grading.warpIntensity=70;}],
+  ['hover-strength','cursor:reveal',(s)=>{s.crt.cursorEffect='reveal';}],
+  ['canvas-','substrate:gradient',(s,source)=>{source.substrateMode='gradient';}],
+ ]) {
+  const d=controls.find(d=>d.id===id);
+  const variant={...d,scenario,prepare:(s,source,o)=>{d.prepare(s,source,o);prepare(s,source,o);}};
+  cases.push(variant,{...variant,scenario:scenario+':stability',values:[d.values[0],d.values[0],d.values[0]]});
+ }
+}
+if (phase === 'probe-hybrid') {
+ cases=[];
+ for (const id of ['print-weight', 'print-registration', 'tile-gap']) {
+  const d=controls.find(d=>d.id===id);
+  cases.push(d);
+  for(let repeat=0;repeat<8;repeat++)cases.push({...d,scenario:'stability:'+repeat,values:[d.values[0],d.values[0],d.values[0]]});
+ }
+}
+
+function setup(engine,target,descriptor,width){
+ const s=structuredClone(BUILTIN_RECIPES[0].state);
+ const baseTarget=target==='base'||target==='hybrid-base';
+ const hybrid=target.startsWith('hybrid-');
+ s.baseCanvas={...DEFAULT_BASE_CANVAS,...s.baseCanvas,mode:hybrid?'hybrid':baseTarget?'full':'blocks',glyphFamily:baseTarget?engine:'density',color:'sampled',cellSize:16};
+ Object.assign(s.tracking,{enabled:false});Object.assign(s.glitch,{enabled:false});
+ Object.assign(s.crt,{phosphorGlow:0,scanlines:0,apertureMask:0,barrelCurve:0,vignette:0,filmGrain:0,hologramGhost:0,dustSpec:0,wholeBloom:0,prismAberration:0,cursorEffect:'off',motionMode:'off',hoverRadius:30,hoverStrength:80,lights:[],textOverlay:undefined});
+ Object.assign(s.grading,{brightness:0,warpMode:'off',warpIntensity:0});
+ const layer={...s.baseCanvas,glyphFamily:baseTarget?'density':engine,id:'audit-layer',label:'Audit',x:.1,y:.1,w:baseTarget ? .2 : .8,h:baseTarget ? .2 : .8,shape:target.endsWith('ellipse')?'ellipse':'rect'};
+ s.regions=baseTarget&&!hybrid?[]:[layer];
+ const source=baseTarget?s.baseCanvas:layer;
+ const options={time:1.4,scale:width/1000,cursor:{x:.52,y:.52,active:false},splitWipeX:null};
+ descriptor.prepare(s,source,options);
+ const reasons=getDisabledControls({state:s,baseCanvas:s.baseCanvas,source,target:baseTarget?'base':'layer',selectedRegion:baseTarget?null:layer,previewScale:width/1000});
+ return {s,source,options,reason:reasons[descriptor.id]};
+}
+function setValue(test,d,v){
+ const [group,key,field]=d.path;const x=v/d.divide;
+ if(group==='source')test.source[key]=x;
+ else if(group==='options')test.options[key]=x;
+ else if(group==='text')test.s.crt.textOverlay[key]=x;
+ else if(group==='light')test.s.crt.lights[key][field]=x;
+ else test.s[group][key]=x;
+}
+function compare(a,b){let sum=0,changed=0,perceptible=0;for(let i=0;i<a.length;i+=4){const r=Math.abs(a[i]-b[i]),g=Math.abs(a[i+1]-b[i+1]),bl=Math.abs(a[i+2]-b[i+2]),alpha=Math.abs(a[i+3]-b[i+3]);sum+=r+g+bl;if(r||g||bl||alpha)changed++;if(Math.max(r,g,bl,alpha)>5)perceptible++;}return{mae:Math.round(sum/(a.length/4*3)*1e5)/1e5,changedPct:Math.round(changed/(a.length/4)*1e4)/100,pctGt5:Math.round(perceptible/(a.length/4)*1e4)/100};}
+function execute(engine,target,d,width=320){
+ const t=setup(engine,target,d,width),frames=[];const height=Math.round(width*image.naturalHeight/image.naturalWidth);
+ for(let j=0;j<3;j++){
+  const c=canvases[j];if(c.width!==width||c.height!==height){c.width=width;c.height=height;}
+  setValue(t,d,d.values[j]);renderStudioFrame(ctxs[j],image,t.s,t.options);frames.push(ctxs[j].getImageData(0,0,width,height).data);
+ }
+ const diff=[compare(frames[0],frames[1]),compare(frames[0],frames[2])];
+ return {engine,target,id:d.id,scenario:d.scenario??'primary',values:d.values,width,height,disabled:!!t.reason,reason:t.reason??null,changed:diff.some(x=>x.changedPct>0),diff};
+}
+const results=[];let running=false;
+const yieldUi=()=>new Promise(resolve=>setTimeout(resolve,0));
+function summary(){const buckets={enabledChanged:0,enabledUnchanged:0,disabledUnchanged:0,disabledChanged:0};for(const r of results)buckets[(r.disabled?'disabled':'enabled')+(r.changed?'Changed':'Unchanged')]++;return {phase,trials:results.length,engines:engines.length,controls:controls.length,casesPerEngine:cases.length,contexts,frames:results.length*3,buckets};}
+function download(){const blob=new Blob([JSON.stringify({summary:summary(),results},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sgnl-all-engines-control-matrix.json';a.click();URL.revokeObjectURL(a.href);}
+$('download').onclick=download;
+$('start').onclick=async()=>{
+ if(running)return;running=true;$('start').disabled=true;await image.decode();await document.fonts.ready;
+ const total=engines.length*contexts.length*cases.length;$('progress').max=total;
+ const started=performance.now();
+ try{
+  for(const engine of engines)for(const target of contexts)for(const d of cases){
+   const r=execute(engine,target,d,d.width??320);results.push(r);
+   if(results.length%12===0){$('status').textContent=`${results.length} / ${total} · ${engine} · ${target} · ${d.id} · ${Math.round((performance.now()-started)/1000)}s`;$('progress').value=results.length;$('summary').textContent=JSON.stringify(summary(),null,2);await yieldUi();}
+  }
+  if($('native').checked){
+   const suspects=results.filter(r=>!r.disabled&&!r.changed);
+   for(let i=0;i<suspects.length;i++){const row=suspects[i],d=cases.find(x=>x.id===row.id&&(x.scenario??'primary')===row.scenario);row.native=execute(row.engine,row.target,d,1280);if(i%4===0){$('status').textContent=`Verificando a 1280px ${i+1} / ${suspects.length}`;await yieldUi();}}
+  }
+  const frag=document.createDocumentFragment();
+  for(const r of results.filter(r=>r.disabled===r.changed).slice(0,150)){const tr=document.createElement('tr');for(const text of [r.engine,r.scenario,r.id,r.disabled?'Bloqueado pero el motor cambia':'Activo sin cambio',r.diff.map(x=>x.pctGt5+'%').join(' / ')]){const td=document.createElement('td');td.textContent=text;tr.append(td);}frag.append(tr);}
+  $('rows').append(frag);$('progress').value=total;$('summary').textContent=JSON.stringify(summary(),null,2);$('json').textContent=JSON.stringify({summary:summary(),results});$('status').textContent=`Completado: ${results.length} tripletas / ${results.length*3} renders en ${Math.round((performance.now()-started)/1000)}s`;$('download').disabled=false;
+ }catch(error){$('status').textContent='ERROR: '+error.message;console.error(error);}
+};
+</script>
+</html>
